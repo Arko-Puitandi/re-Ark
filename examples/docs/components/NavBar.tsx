@@ -3,7 +3,9 @@ import React from 'react';
 import { cx } from '../../../src/core/cx';
 
 const NAV_ITEMS = [
-  { id: 'components', label: 'Components', route: 'components', description: 'Browse UI components' },
+  { id: 'components', label: 'Components', route: 'components', description: 'Browse UI components', children: [
+    { id: 'components-buttons', label: 'Buttons', route: 'components/buttons' }
+  ] },
   { id: 'playground', label: 'Playground', route: 'playground', description: 'Live code sandbox' },
   { id: 'about', label: 'About', route: 'about', description: 'Project info' },
 ];
@@ -22,19 +24,16 @@ export default function NavBar({
   theme?: 'light' | 'dark';
 }) {
   const [open, setOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState('');
+
+  React.useEffect(() => setOpen(false), [route]);
 
   const filtered = React.useMemo(() => {
     if (!query) return NAV_ITEMS;
     const q = query.toLowerCase();
     return NAV_ITEMS.filter((i) => i.label.toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q));
   }, [query]);
-
-  React.useEffect(() => {
-    setOpen(false);
-  }, [route]);
-
-  const themeIcon = theme === 'dark' ? '🌙' : '☀️';
 
   return (
     <div className="docs-navbar">
@@ -47,13 +46,11 @@ export default function NavBar({
         <div className="docs-controls">
           <button
             className="theme-btn"
-            onClick={() => {
-              onToggleTheme?.();
-            }}
+            onClick={() => onToggleTheme?.()}
             title="Toggle theme"
             aria-label="Toggle theme"
           >
-            {themeIcon}
+            {theme === 'dark' ? '🌙' : '☀️'}
           </button>
 
           <button
@@ -79,22 +76,40 @@ export default function NavBar({
 
         <nav className="docs-nav">
           {filtered.map((item) => {
-            const active = route === item.route;
+            const active = route === item.route || route.startsWith(item.route + '/');
             return (
-              <a
-                key={item.id}
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setRoute(item.route);
-                }}
-                className={cx('docs-nav-link', active && 'active')}
-                title={item.description}
-              >
-                <span className="nav-label">{item.label}</span>
-                <br/>
-                <small className="nav-desc">{item.description}</small>
-              </a>
+              <div key={item.id}>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); setRoute(item.route); }}
+                  className={cx('docs-nav-link', active && 'active')}
+                  title={item.description}
+                >
+                  <span className="nav-label">{item.label}</span>
+                  <br/>
+                  <small className="nav-desc">{item.description}</small>
+                </a>
+
+                {/* children links */}
+                {item.children?.length ? (
+                  <div style={{ paddingLeft: 12, marginTop: 4 }}>
+                    {item.children.map((c) => {
+                      const activeChild = route === c.route;
+                      return (
+                        <a
+                          key={c.id}
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); setRoute(c.route); }}
+                          className={cx('docs-nav-link', activeChild && 'active')}
+                          style={{ fontSize: 13, padding: '6px 8px' }}
+                        >
+                          {c.label}
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </nav>

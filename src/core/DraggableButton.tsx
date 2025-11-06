@@ -24,14 +24,28 @@ export function DraggableButton({ children, initialX = 0, initialY = 0 }: {
       dragging = true;
       startX = ev.clientX;
       startY = ev.clientY;
-      el.setPointerCapture(ev.pointerId);
+      try { el.setPointerCapture(ev.pointerId); } catch {}
     };
     const handlePointerMove = (ev: PointerEvent) => {
       if (!dragging) return;
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
-      const nx = pos.current.x + dx;
-      const ny = pos.current.y + dy;
+      let nx = pos.current.x + dx;
+      let ny = pos.current.y + dy;
+
+      // clamp into parent
+      const parent = el.parentElement;
+      if (parent) {
+        const pRect = parent.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const minX = 0;
+        const minY = 0;
+        const maxX = pRect.width - elRect.width;
+        const maxY = pRect.height - elRect.height;
+        nx = Math.max(minX, Math.min(nx, maxX));
+        ny = Math.max(minY, Math.min(ny, maxY));
+      }
+
       el.style.left = `${nx}px`;
       el.style.top = `${ny}px`;
     };

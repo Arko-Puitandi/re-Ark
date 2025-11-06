@@ -5,6 +5,8 @@ import { ReButtonGroup } from '../../../src/core/ReButtonGroup';
 import { ReToggleButton } from '../../../src/core/ReToggleButton';
 import { ReToggleButtonGroup } from '../../../src/core/ReToggleButtonGroup';
 import { ReBox } from '../../../src/core/ReBox';
+import { DraggableButton } from '../../../src/core/DraggableButton';
+import { ResizableButton } from '../../../src/core/ResizableButton';
 
 const DemoIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -33,13 +35,6 @@ export default function ButtonExplorer() {
   const variants: Variant[] = ['solid', 'outline', 'ghost', 'soft', 'text', 'icon'];
   const colors: Color[] = ['primary', 'success', 'warning', 'danger', 'neutral'];
   const sizes: Size[] = ['sm', 'md', 'lg'];
-
-  // helper to produce a prop string (JSX-friendly)
-  const propStr = (name: string, value: any) => {
-    if (typeof value === 'string') return `${name}="${value}"`;
-    if (typeof value === 'boolean') return value ? name : '';
-    return `${name}={${JSON.stringify(value)}}`;
-  };
 
   // generate code depending on current preview mode
   const generateCode = (): string => {
@@ -167,34 +162,38 @@ export default function ButtonExplorer() {
 
   const code = React.useMemo(() => generateCode(), [variant, color, size, loading, loadingDelay, disabled, startIcon, endIcon, iconOnly, groupMode, toggleMode]);
 
+  const [copied, setCopied] = React.useState(false);
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(code);
-      // small visual feedback
-      // eslint-disable-next-line no-alert
-      // use non-blocking small UI. For now alert to confirm success.
-      // In real docs use toast; here quick alert is fine.
-      alert('Code copied to clipboard');
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
     } catch {
+      // fallback: select text? show alert
+      // eslint-disable-next-line no-alert
       alert('Copy failed — select & copy manually');
     }
   };
 
-  // terminal-style window header
-  const Terminal = ({ children }: { children: React.ReactNode }) => (
+  // Terminal component (terminal-like code window with copy button)
+  const Terminal: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 6px 18px rgba(2,6,23,0.06)', marginTop: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'linear-gradient(180deg, rgba(255,255,255,0.04), transparent)' }}>
         <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ff5f56' }} />
         <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ffbd2e' }} />
         <div style={{ width: 12, height: 12, borderRadius: 999, background: '#27c93f' }} />
-        <div style={{ marginLeft: 'auto' }}>
-          <button onClick={copyToClipboard} style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: 'var(--re-color-primary)', color: '#fff', cursor: 'pointer' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={copyToClipboard}
+            style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: 'var(--re-color-primary)', color: '#fff', cursor: 'pointer' }}
+          >
             Copy
           </button>
+          {copied ? <span style={{ fontSize: 13, color: 'var(--re-color-muted)' }}>Copied ✓</span> : null}
         </div>
       </div>
       <div style={{ background: '#0f1720', color: '#cfe8ff', padding: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace', fontSize: 13 }}>
-        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{code}</pre>
+        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{children}</pre>
       </div>
     </div>
   );
@@ -311,9 +310,78 @@ export default function ButtonExplorer() {
           </div>
 
           <h4 style={{ marginTop: 12 }}>Generated code</h4>
-          <Terminal>
-            {code}
-          </Terminal>
+          <Terminal>{code}</Terminal>
+
+         
+        </div>
+      </ReBox>
+      <h4>Draggable & Resizable Button Demos</h4>
+      <ReBox
+        css={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: '32px',
+          marginBottom: '24px',
+          padding: '16px'
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 8,
+            padding: 24,
+            background: 'var(--re-surface)',
+            position: 'relative',
+            overflow: 'hidden',
+            height: '280px',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <strong style={{ display: 'block', marginBottom: 16 }}>Draggable demo (drag inside this box)</strong>
+          <div style={{ 
+            position: 'relative',
+            flex: 1,
+            background: 'transparent',
+            border: '1px dashed var(--re-color-muted)',
+            borderRadius: 4
+          }}>
+            <DraggableButton initialX={20} initialY={20}>
+              <ReButton variant="solid" color="primary">Drag me</ReButton>
+            </DraggableButton>
+          </div>
+          <p style={{ marginTop: 16, fontSize: 13, color: 'var(--re-color-muted)' }}>
+            Pointer-down and drag anywhere on the button. Release to drop.
+          </p>
+        </div>
+
+        <div
+          style={{
+            borderRadius: 8,
+            padding: 24,
+            background: 'var(--re-surface)',
+            height: '280px',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <strong style={{ display: 'block', marginBottom: 16 }}>Resizable demo (drag the handle)</strong>
+          <div style={{ 
+            flex: 1,
+            background: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px dashed var(--re-color-muted)',
+            borderRadius: 4,
+            padding: 24
+          }}>
+            <ResizableButton>
+              <ReButton variant="outline" color="primary">Resize me</ReButton>
+            </ResizableButton>
+          </div>
+          <p style={{ marginTop: 16, fontSize: 13, color: 'var(--re-color-muted)' }}>
+            Grab the small handle to the right of the button and drag horizontally to change width.
+          </p>
         </div>
       </ReBox>
 
