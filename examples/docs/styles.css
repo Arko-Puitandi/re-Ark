@@ -1,0 +1,99 @@
+:root {
+  --docs-sidebar-width: 260px;
+  --docs-gap: 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* base layout + resets */
+* { box-sizing: border-box; }
+html,body,#root { height: 100%; margin: 0; }
+.docs-app { display: flex; height: 100vh; background: var(--re-color-bg); color: var(--re-color-foreground); }
+
+/* sidebar & main */
+.docs-sidebar {
+  width: var(--docs-sidebar-width);
+  padding: 20px;
+  border-right: 1px solid rgba(0,0,0,0.05);
+  background: var(--re-sidebar-bg, #fafafa);
+}
+.docs-main { flex: 1; padding: 28px; overflow: auto; }
+
+/* nav legacy (kept for backwards compatibility) */
+.docs-nav a { display: block; padding: 8px 6px; color: inherit; text-decoration: none; margin-bottom: 6px; border-radius: 6px;}
+.docs-nav a:hover { background: rgba(0,0,0,0.03); }
+
+/* example card + playground */
+.example-card {
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  background: var(--re-surface);
+  margin-bottom: 18px;
+  color: var(--re-color-foreground);
+}
+.playground { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.playground textarea { width: 100%; height: 60vh; font-family: monospace; font-size: 13px; padding: 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); background: #0f1720; color: #e6eef8;}
+.playground iframe { width: 100%; height: 60vh; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; background: var(--re-surface); }
+
+/* button / group helpers */
+.re-button { box-sizing: border-box; }
+.re-button-group span > * { display: inline-flex; }
+
+/* -----------------------
+   Docs nav / responsive
+   ----------------------- */
+
+.docs-navbar { display: flex; flex-direction: column; height: 100%; padding: 6px 6px 12px 6px; box-sizing: border-box; }
+.docs-navbar-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.docs-brand { cursor:pointer; display:flex; flex-direction:row; gap:8px; align-items:center; }
+.brand-logo { font-weight:700; font-size:18px; letter-spacing:0.4px; color: var(--re-color-foreground); }
+.brand-meta { font-size:12px; color:var(--re-color-muted); margin-left: 4px; }
+
+.docs-controls { display:flex; gap:8px; align-items:center; }
+.theme-btn { background:transparent; border:none; cursor:pointer; padding:6px; border-radius:8px; font-size:16px; }
+.hamburger { background:transparent; border:none; cursor:pointer; padding:6px; display:none; }
+
+.docs-navbar-body { margin-top:12px; display:flex; flex-direction:column; gap:12px; }
+.nav-search input { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); box-sizing:border-box; font-size:14px; background: transparent; color: inherit; }
+
+.docs-nav { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.docs-nav-link { display:flex; flex-direction:column; padding:10px 8px; border-radius:8px; text-decoration:none; color:inherit; transition: background .12s ease; }
+.docs-nav-link .nav-label { font-weight:600; }
+.docs-nav-link .nav-desc { font-size:12px; color:var(--re-color-muted); margin-top:4px; }
+.docs-nav-link.active { background: rgba(0,0,0,0.05); }
+
+.docs-footer { margin-top:auto; font-size:12px; color:var(--re-color-muted); }
+
+/* responsive: collapse sidebar into hamburger */
+@media (max-width: 880px) {
+  .docs-sidebar { width:100%; position:relative; }
+  .docs-main { padding: 12px; }
+  .hamburger { display:inline-flex; }
+  .docs-navbar-body { display:none; position:absolute; left:12px; top:64px; z-index:50; background:var(--re-surface); padding:12px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.12); width:220px; max-height:70vh; overflow:auto; }
+  .docs-navbar-body.open { display:flex; }
+}
+
+/* Small improvements for docs visuals */
+.docs-sidebar h2 { margin: 0 0 12px 0; font-size: 20px; }
+.docs-main h1 { margin-top: 0; font-size: 32px; font-weight: 700; color: var(--re-color-foreground);}
+.docs-nav-link:hover { background: rgba(0,0,0,0.03); }
+
+/* Ensure explorer controls look neat */
+.docs-main button { cursor: pointer; border-radius: 8px; background: transparent; border: 1px solid rgba(0,0,0,0.06); padding: 6px 10px; }
+.docs-main button.primary { background: var(--re-color-primary); color: white; border: none; }
+.docs-main pre { white-space: pre-wrap; word-break: break-word; padding: 12px; border-radius: 8px; }
+
+/* Theme-aware adjustments: use correct data attribute name `data-re-theme` */
+:root[data-re-theme='dark'] .docs-sidebar,
+:root[data-re-theme='dark'] .docs-navbar-body {
+  background: var(--re-sidebar-bg);
+  color: var(--re-color-foreground);
+}
+
+:root[data-re-theme='dark'] .docs-main {
+  background: transparent;
+  color: var(--re-color-foreground);
+}
+
+/* small transition */
+.example-card, .docs-nav-link, .docs-main button { transition: all .12s ease; }
