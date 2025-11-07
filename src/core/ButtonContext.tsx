@@ -6,9 +6,16 @@ export type ButtonContextValue = {
   color?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
-  // group can provide a function to notify children (unused now but available)
+  gradient?: boolean;
+  glass?: boolean;
+  animation?: 'pulse' | 'pop' | 'slide';
+  // Button group functionality
   register?: (id: string) => void;
   unregister?: (id: string) => void;
+  isSelected?: boolean;
+  onSelect?: (value: string) => void;
+  value?: string;
+  exclusive?: boolean;
 };
 
 export const ButtonContext = React.createContext<ButtonContextValue | undefined>(undefined);

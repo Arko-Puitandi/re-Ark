@@ -6,6 +6,10 @@ import { cx } from './cx';
 
 export type ReButtonGroupProps = {
   children?: React.ReactNode;
+  /**
+   * Visual grouping variant (affects container background/border).
+   * Kept for future usage; currently group mainly forwards buttonVariant to children.
+   */
   variant?: 'default' | 'outlined';
   size?: 'sm' | 'md' | 'lg';
   color?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
@@ -25,7 +29,7 @@ export function ReButtonGroup({
   style,
   disabled = false,
 }: ReButtonGroupProps) {
-  // provide context to children
+  // provide context defaults to children (ReButton will read these via ButtonContext)
   const ctxValue = React.useMemo(
     () => ({
       variant: buttonVariant,
@@ -36,17 +40,22 @@ export function ReButtonGroup({
     [buttonVariant, color, size, disabled]
   );
 
-  // render children as-is: ReButton will take context defaults
-  // wrap to handle adjacent radii
+  // render children, wrapping each in a span so we can apply border radius + separators
   const items = React.Children.toArray(children);
 
   return (
     <ButtonContext.Provider value={ctxValue}>
-      <ReBox as="div" className={cx('re-button-group', className)} style={{ display: 'inline-flex', gap: 0, ...style }}>
+      <ReBox
+        as="div"
+        className={cx('re-button-group', className)}
+        style={{ display: 'inline-flex', gap: 0, alignItems: 'stretch', ...style }}
+      >
         {items.map((child, i) => {
           const isFirst = i === 0;
           const isLast = i === items.length - 1;
-          const wrapperStyle: React.CSSProperties = { overflow: 'hidden' };
+          const wrapperStyle: React.CSSProperties = { overflow: 'hidden', display: 'inline-flex' };
+
+          // rounded corners for the first and last
           if (isFirst) {
             wrapperStyle.borderTopLeftRadius = 8;
             wrapperStyle.borderBottomLeftRadius = 8;
@@ -55,9 +64,13 @@ export function ReButtonGroup({
             wrapperStyle.borderTopRightRadius = 8;
             wrapperStyle.borderBottomRightRadius = 8;
           }
+
+          // separator between buttons (theme-aware border color)
           if (!isLast) {
-            wrapperStyle.borderRight = '1px solid rgba(0,0,0,0.06)';
+            wrapperStyle.borderRight = '1px solid var(--re-border, rgba(0,0,0,0.06))';
           }
+
+          // preserve child's key when possible; React.Children.toArray already gives stable keys
           return (
             <span key={i} style={wrapperStyle}>
               {child}
@@ -68,3 +81,5 @@ export function ReButtonGroup({
     </ButtonContext.Provider>
   );
 }
+
+export default ReButtonGroup;

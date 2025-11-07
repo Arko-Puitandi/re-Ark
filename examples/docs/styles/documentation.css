@@ -1,0 +1,78 @@
+.button-explorer {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.example-card {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid var(--re-color-border);
+  border-radius: var(--re-radius-lg);
+  background: var(--re-color-card);
+}
+
+.example-card h3 {
+  color: var(--re-color-text);
+  margin-bottom: 16px;
+}
+
+.example-card code {
+  display: block;
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--re-color-code-bg);
+  border-radius: var(--re-radius-md);
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--re-color-code);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.api-reference {
+  margin-top: 48px;
+}
+
+.api-reference table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+}
+
+.api-reference th,
+.api-reference td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--re-color-border);
+}
+
+.api-reference th {
+  font-weight: 600;
+  background: var(--re-color-table-header);
+}
+
+.api-reference td {
+  font-size: 14px;
+}
+
+.api-reference td:first-child {
+  font-family: monospace;
+  color: var(--re-color-primary);
+}
+
+.api-reference td:nth-child(2) {
+  font-family: monospace;
+  color: var(--re-color-code);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .example-card {
+    background: var(--re-color-card-dark);
+  }
+
+  .example-card code {
+    background: var(--re-color-code-bg-dark);
+  }
+}

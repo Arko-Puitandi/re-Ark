@@ -11,6 +11,10 @@ type ClassValue = string | number | undefined | null | false | ClassDictionary |
 interface ClassDictionary { [key: string]: any }
 interface ClassArray extends Array<ClassValue> {}
 
+export function css(strings: TemplateStringsArray, ...values: any[]): string {
+  return strings.reduce((acc, str, i) => acc + str + (values[i] || ''), '');
+}
+
 export function cx(...inputs: ClassValue[]): string {
   const out: string[] = [];
 

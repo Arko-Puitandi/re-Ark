@@ -13,7 +13,7 @@
   "license": "ISC",
   "description": "",
   "type": "module",
-  "sideEffects": "false",
+  "sideEffects": false,
   "devDependencies": {
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

@@ -9,6 +9,9 @@ import ComponentsPage from './pages/ComponentsPage';
 import ButtonsPage from './pages/ButtonsPage';
 import PlaygroundPage from './pages/Playground';
 
+import './styles.css';
+import './global.css';
+
 // Expose components to window for playground
 (window as any).__REARK__ = {
   ReBox,

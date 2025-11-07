@@ -7,6 +7,16 @@
   --re-color-foreground: #0b1320;
   --re-color-muted: #6b7280;
   --re-color-primary: #0b69ff;
+  --re-color-primary-soft: rgba(11,105,255,0.12);
+  --re-color-primary-light: #3c8dff;
+  --re-color-success: #10b981;
+  --re-color-success-light: #34d399;
+  --re-color-warning: #f59e0b;
+  --re-color-warning-light: #fcd34d;
+  --re-color-danger: #ef4444;
+  --re-color-danger-light: #f87171;
+  --re-color-neutral: #6b7280;
+  --re-color-neutral-light: #9ca3af;
   --re-surface: #ffffff;
   --re-sidebar-bg: #fafafa;
 

@@ -1,8 +1,12 @@
-// src/core/ReButton.tsx
+// src/core/ReButton.v2.tsx
 import React from 'react';
 import { cx } from './cx';
 import { composeRefs } from './composeRefs';
 import { useButtonContext } from './ButtonContext';
+import { useLongPress } from '../hooks/useLongPress';
+import { triggerHapticFeedback } from '../utils/haptics';
+import { buttonGradients } from './styles/buttonStyles';
+import { handleAsyncClick } from './buttonUtils';
 
 type ColorIntent = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
 type Variant = 'solid' | 'outline' | 'ghost' | 'soft' | 'text' | 'icon';
@@ -11,15 +15,30 @@ type Size = 'sm' | 'md' | 'lg';
 export type ReButtonProps<E extends React.ElementType = 'button'> = {
   children?: React.ReactNode;
   loading?: boolean;
+  loadingText?: string;
   loadingDelay?: number;
   variant?: Variant;
   color?: ColorIntent;
   size?: Size;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
-  draggable?: boolean; // just forward, wrapper will implement behavior
-  resizable?: boolean; // just forward, wrapper will implement behavior
+  draggable?: boolean;
+  resizable?: boolean;
   'aria-label'?: string;
+  // New props
+  async?: boolean;
+  tooltip?: string;
+  haptic?: boolean;
+  animation?: 'pulse' | 'pop' | 'slide';
+  gradient?: boolean;
+  glass?: boolean;
+  longPressDuration?: number;
+  onLongPress?: () => void;
+  badge?: number | string;
+  feedback?: {
+    success?: string;
+    error?: string;
+  };
 } & Omit<React.ComponentPropsWithRef<E>, 'as' | 'children'> & {
     as?: E;
   };
@@ -40,172 +59,161 @@ const Spinner = ({ size = 16 }: { size?: number }) => (
 
 const _ReButton = <E extends React.ElementType = 'button'>(
   props: ReButtonProps<E>,
-  ref: React.Ref<any>
+  ref: React.ForwardedRef<any>
 ) => {
   const context = useButtonContext();
+  const [asyncState, setAsyncState] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [feedbackText, setFeedbackText] = React.useState<string>('');
 
   const {
     as,
     children,
     loading = false,
-    loadingDelay = 150,
-    variant: variantProp,
-    color: colorProp,
-    size: sizeProp,
+    loadingText,
+    loadingDelay = 0,
+    variant = context?.variant || 'solid',
+    color = context?.color || 'primary',
+    size = context?.size || 'md',
     startIcon,
     endIcon,
     className,
-    disabled,
-    onPointerDown,
-    onClick,
+    disabled = false,
+    draggable,
+    resizable,
+    async = false,
+    tooltip,
+    haptic = false,
+    animation,
+    gradient = false,
+    glass = false,
+    longPressDuration,
+    onLongPress,
+    badge,
+    feedback,
     ...rest
   } = props;
 
-  const variant = variantProp ?? context?.variant ?? 'solid';
-  const color = colorProp ?? (context?.color as ColorIntent) ?? 'primary';
-  const size = sizeProp ?? (context?.size as Size) ?? 'md';
-  const Comp: React.ElementType = as || 'button';
-  const isNativeButton = typeof Comp === 'string' && Comp.toLowerCase() === 'button';
+  const Component = as || 'button';
+  const composedRef = composeRefs([ref]);
+  const tokens = sizeTokens[size];
 
-  const { padding, fontSize, iconSize } = sizeTokens[size];
+  // Handle long press
+  const longPressProps = onLongPress
+    ? useLongPress({
+        onLongPress,
+        onClick: rest.onClick as () => void,
+        duration: longPressDuration,
+      })
+    : {};
 
-  const base: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding,
-    fontSize,
-    borderRadius: 8,
-    lineHeight: 1,
-    transition: 'background .12s ease, transform .06s ease, opacity .12s ease',
-    userSelect: 'none',
-    cursor: disabled || loading ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.6 : 1,
-    position: 'relative',
-  };
-
-  const intentVar = `--re-color-${color}`;
-  const resolved: React.CSSProperties = { ...base };
-
-  if (variant === 'solid') {
-    resolved.background = `var(${intentVar})`;
-    resolved.color = 'white';
-    resolved.border = 'none';
-  } else if (variant === 'outline') {
-    resolved.background = 'transparent';
-    resolved.color = `var(${intentVar})`;
-    resolved.border = `1px solid rgba(0,0,0,0.08)`;
-  } else if (variant === 'ghost') {
-    resolved.background = 'transparent';
-    resolved.color = `var(${intentVar})`;
-    resolved.border = 'none';
-  } else if (variant === 'soft') {
-    resolved.background = `rgba(0,0,0,0.03)`;
-    resolved.color = `var(${intentVar})`;
-    resolved.border = 'none';
-  } else if (variant === 'text') {
-    resolved.background = 'transparent';
-    resolved.color = `var(${intentVar})`;
-    resolved.border = 'none';
-    (resolved as any).padding = 0;
-  } else if (variant === 'icon') {
-    const sizePx = size === 'sm' ? 32 : size === 'lg' ? 44 : 36;
-    resolved.width = sizePx;
-    resolved.height = sizePx;
-    resolved.padding = 0;
-    resolved.borderRadius = 9999;
-    resolved.background = 'transparent';
-    resolved.color = `var(${intentVar})`;
-    resolved.border = 'none';
-  }
-
-  // smart loading: show spinner only after delay
-  const [showSpinner, setShowSpinner] = React.useState(false);
-  React.useEffect(() => {
-    let timer: number | undefined;
-    if (loading) {
-      timer = window.setTimeout(() => setShowSpinner(true), loadingDelay);
-    } else {
-      setShowSpinner(false);
-    }
-    return () => {
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [loading, loadingDelay]);
-
-  // ripple effect: create a span at pointer location
-  const localRef = React.useRef<HTMLElement | null>(null);
-  const combinedRef = composeRefs(ref as React.Ref<any>, localRef);
-
-  const createRipple = (ev: React.PointerEvent) => {
-    const el = localRef.current as HTMLElement | null;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = ev.clientX - rect.left;
-    const y = ev.clientY - rect.top;
+  // Create ripple effect
+  const createRipple = (event: React.MouseEvent) => {
+    const button = event.currentTarget as HTMLElement;
     const ripple = document.createElement('span');
-    ripple.className = 're-ripple';
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = `${size}px`;
     ripple.style.left = `${x}px`;
     ripple.style.top = `${y}px`;
-    ripple.style.width = `${Math.max(rect.width, rect.height) * 0.3}px`;
-    ripple.style.height = ripple.style.width;
-    ripple.style.background = getComputedStyle(el).color || 'currentColor';
-    el.appendChild(ripple);
-    window.setTimeout(() => {
-      ripple.remove();
-    }, 700);
+    ripple.className = 'ripple';
+
+    button.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
   };
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // only left clicks/touch
-    if (e.button === 0) createRipple(e);
-    onPointerDown?.(e);
+  // Handle async click
+  const handleClick = async (e: React.MouseEvent) => {
+    // Create ripple effect
+    createRipple(e);
+    if (haptic) {
+      triggerHapticFeedback();
+    }
+
+    if (async && rest.onClick) {
+      e.preventDefault();
+      await handleAsyncClick(
+        rest.onClick as (...args: any[]) => Promise<any>,
+        setAsyncState,
+        setFeedbackText,
+        feedback
+      );
+    } else {
+      rest.onClick?.(e);
+    }
   };
 
-  const extraProps: Record<string, any> = {};
-  if (isNativeButton && (rest as any).type === undefined) extraProps.type = 'button';
+  // Determine button text
+  const buttonText = loading
+    ? loadingText || children
+    : feedbackText || children;
 
-  const ariaProps: Record<string, any> = {};
-  if (loading) ariaProps['aria-busy'] = true;
-
-  const isIconOnly = variant === 'icon' || (!children && (startIcon || endIcon));
-
-  // skeleton style applied while showSpinner true and variant is ghost/outline? We'll always show skeleton overlay
-  const skeletonClass = showSpinner ? 're-button-skeleton' : undefined;
+  const styles: React.CSSProperties = {
+    padding: tokens.padding,
+    fontSize: tokens.fontSize,
+    background: gradient ? (buttonGradients as any)[color] : undefined,
+    // glass inline styles (don't spread CSS string into style)
+    ...(glass
+      ? {
+          backdropFilter: 'blur(8px)',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.06)'
+        }
+      : {}),
+  };
 
   return (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Comp
-      ref={combinedRef as any}
-      className={cx('re-button', skeletonClass, className)}
-      style={resolved}
-      disabled={disabled || loading}
-      onPointerDown={handlePointerDown}
-      onClick={onClick}
-      {...(rest as any)}
-      {...extraProps}
-      {...ariaProps}
-    >
-      {showSpinner ? (
-        <span aria-hidden style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Spinner size={iconSize} />
-        </span>
-      ) : (
-        <>
-          {startIcon ? <span style={{ display: 'inline-flex', width: iconSize, height: iconSize }}>{startIcon}</span> : null}
-          {children ? <span>{children}</span> : null}
-          {endIcon ? <span style={{ display: 'inline-flex', width: iconSize, height: iconSize }}>{endIcon}</span> : null}
-        </>
+    <Component
+      ref={composedRef}
+      className={cx(
+        'reark-button',
+        className,
+        loading && 'loading',
+        disabled && 'disabled',
+        variant && `variant-${variant}`,
+        color && `color-${color}`,
+        size && `size-${size}`,
+        gradient && 'gradient',
+        glass && 'glass',
+        asyncState !== 'idle' && `async-${asyncState}`,
+        badge && 'with-badge'
       )}
-    </Comp>
+      disabled={disabled || loading || asyncState === 'loading'}
+      data-draggable={draggable}
+      data-resizable={resizable}
+      data-badge={badge}
+      title={tooltip}
+      onClick={handleClick}
+      style={styles}
+      {...longPressProps}
+      {...rest}
+    >
+      {/* Loading spinner */}
+      {loading && (
+        <span className="button-spinner">
+          <Spinner size={tokens.iconSize} />
+        </span>
+      )}
+
+      {/* Start icon */}
+      {startIcon && !loading && (
+        <span className="button-icon button-icon-start">{startIcon}</span>
+      )}
+
+      {/* Button text */}
+      <span className="button-content">{buttonText}</span>
+
+      {/* End icon */}
+      {endIcon && !loading && (
+        <span className="button-icon button-icon-end">{endIcon}</span>
+      )}
+    </Component>
   );
 };
 
-type PolymorphicReButton = {
-  <E extends React.ElementType = 'button'>(props: ReButtonProps<E> & { ref?: React.Ref<any> }): React.ReactElement | null;
-  displayName?: string;
-};
-
-export const ReButton = React.forwardRef(_ReButton) as PolymorphicReButton;
-ReButton.displayName = 'ReButton';
+export const ReButton = React.forwardRef(_ReButton) as <E extends React.ElementType = 'button'>(
+  props: ReButtonProps<E> & { ref?: React.ForwardedRef<any> }
+) => React.ReactElement;

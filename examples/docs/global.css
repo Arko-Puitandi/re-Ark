@@ -1,0 +1,199 @@
+/* global.css - Re-ARK Component Styles */
+
+/* Button base styles */
+.reark-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--re-radius-md, 0.375rem);
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+  border: none;
+}
+
+.reark-button:focus-visible {
+  outline: 2px solid var(--re-color-primary);
+  outline-offset: 2px;
+}
+
+.reark-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Color variants */
+.reark-button.variant-solid {
+  background: var(--re-color-primary);
+  color: white;
+}
+
+.reark-button.variant-outline {
+  background: transparent;
+  border: 1px solid var(--re-color-primary);
+  color: var(--re-color-primary);
+}
+
+.reark-button.variant-ghost {
+  background: transparent;
+  color: var(--re-color-primary);
+}
+
+.reark-button.variant-soft {
+  background: var(--re-color-primary-soft, rgba(11,105,255,0.12));
+  color: var(--re-color-primary);
+}
+
+.reark-button.variant-text {
+  background: transparent;
+  padding: 0;
+  color: var(--re-color-primary);
+}
+
+.reark-button.variant-icon {
+  padding: 8px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--re-color-primary);
+}
+
+/* Color intents */
+.reark-button.color-primary.variant-solid {
+  background: var(--re-color-primary);
+  color: white;
+}
+
+.reark-button.color-success.variant-solid {
+  background: var(--re-color-success);
+  color: white;
+}
+
+.reark-button.color-warning.variant-solid {
+  background: var(--re-color-warning);
+  color: black;
+}
+
+.reark-button.color-danger.variant-solid {
+  background: var(--re-color-danger);
+  color: white;
+}
+
+.reark-button.color-neutral.variant-solid {
+  background: var(--re-color-neutral);
+  color: white;
+}
+
+/* Size variants */
+.reark-button.size-sm {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.reark-button.size-md {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.reark-button.size-lg {
+  padding: 10px 16px;
+  font-size: 15px;
+}
+
+/* Animations */
+@keyframes re-button-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes re-button-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes re-button-slide {
+  0% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
+.reark-button.animation-pulse {
+  animation: re-button-pulse 0.3s ease-in-out;
+}
+
+.reark-button.animation-pop {
+  animation: re-button-pop 0.2s ease-out;
+}
+
+.reark-button.animation-slide {
+  animation: re-button-slide 0.2s ease-out;
+}
+
+/* Loading spinner */
+@keyframes re-spin {
+  to { transform: rotate(360deg); }
+}
+
+.reark-button .button-spinner {
+  animation: re-spin 0.9s linear infinite;
+}
+
+/* Ripple effect */
+.reark-button .ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Badge */
+.reark-button.with-badge {
+  position: relative;
+}
+
+.reark-button.with-badge[data-badge]::after {
+  content: attr(data-badge);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--re-color-danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* State-based styles */
+.reark-button.loading {
+  cursor: wait;
+}
+
+.reark-button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Glass effect */
+.reark-button.glass {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

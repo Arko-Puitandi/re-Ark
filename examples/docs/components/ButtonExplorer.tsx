@@ -1,12 +1,17 @@
 // examples/docs/components/ButtonExplorer.tsx
 import React from 'react';
-import { ReButton } from '../../../src/core/ReButton';
-import { ReButtonGroup } from '../../../src/core/ReButtonGroup';
-import { ReToggleButton } from '../../../src/core/ReToggleButton';
-import { ReToggleButtonGroup } from '../../../src/core/ReToggleButtonGroup';
-import { ReBox } from '../../../src/core/ReBox';
-import { DraggableButton } from '../../../src/core/DraggableButton';
-import { ResizableButton } from '../../../src/core/ResizableButton';
+import {
+  ReButton,
+  ReButtonGroup,
+  ReToggleButton,
+  ReToggleButtonGroup,
+  ReBox,
+  DraggableButton,
+  ResizableButton,
+  ReSplitButton,
+  ReButtonToolbar,
+  ReIconButton
+} from '../../../src';
 
 const DemoIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -17,6 +22,71 @@ const DemoIcon = ({ size = 16 }: { size?: number }) => (
 type Variant = 'solid' | 'outline' | 'ghost' | 'soft' | 'text' | 'icon';
 type Color = 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
 type Size = 'sm' | 'md' | 'lg';
+
+// Terminal component (terminal-like code window with copy button)
+const Terminal: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 6px 18px rgba(2,6,23,0.06)', marginTop: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'linear-gradient(180deg, rgba(255,255,255,0.04), transparent)' }}>
+      <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ff5f56' }} />
+      <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ffbd2e' }} />
+      <div style={{ width: 12, height: 12, borderRadius: 999, background: '#27c93f' }} />
+    </div>
+    <div style={{ background: '#0f1720', color: '#cfe8ff', padding: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace', fontSize: 13 }}>
+      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{children}</pre>
+    </div>
+  </div>
+);
+
+// --- Feature Gallery Section ---
+function FeatureGallery() {
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2>Button Feature Gallery</h2>
+      <div style={{ display: 'grid', gap: 32 }}>
+        {/* Split Button Demo */}
+        <section>
+          <h3>Split Button</h3>
+          <ReSplitButton
+            label="Export"
+            options={['PDF', 'Excel', 'CSV']}
+            onSelect={opt => alert(`Export as ${opt}`)}
+          />
+          <Terminal>{`
+<ReSplitButton
+  label="Export"
+  options={['PDF', 'Excel', 'CSV']}
+  onSelect={opt => exportData(opt)}
+/>
+          `}</Terminal>
+        </section>
+
+        {/* Toolbar Demo */}
+        <section>
+          <h3>Button Toolbar</h3>
+          <ReButtonToolbar align="end">
+            <ReButton variant="outline">Cancel</ReButton>
+            <ReButton color="primary">Save</ReButton>
+          </ReButtonToolbar>
+          <Terminal>{`
+<ReButtonToolbar align="end">
+  <ReButton variant="outline">Cancel</ReButton>
+  <ReButton color="primary">Save</ReButton>
+</ReButtonToolbar>
+          `}</Terminal>
+        </section>
+
+        {/* Icon Button Demo */}
+        <section>
+          <h3>Icon Button</h3>
+          <ReIconButton icon={<DemoIcon />} color="danger" tooltip="Delete" />
+          <Terminal>{`
+<ReIconButton icon={<DemoIcon />} color="danger" tooltip="Delete" />
+          `}</Terminal>
+        </section>
+      </div>
+    </div>
+  );
+}
 
 export default function ButtonExplorer() {
   const [variant, setVariant] = React.useState<Variant>('solid');
@@ -174,29 +244,6 @@ export default function ButtonExplorer() {
       alert('Copy failed — select & copy manually');
     }
   };
-
-  // Terminal component (terminal-like code window with copy button)
-  const Terminal: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-    <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 6px 18px rgba(2,6,23,0.06)', marginTop: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'linear-gradient(180deg, rgba(255,255,255,0.04), transparent)' }}>
-        <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ff5f56' }} />
-        <div style={{ width: 12, height: 12, borderRadius: 999, background: '#ffbd2e' }} />
-        <div style={{ width: 12, height: 12, borderRadius: 999, background: '#27c93f' }} />
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button
-            onClick={copyToClipboard}
-            style={{ padding: '6px 10px', borderRadius: 8, border: 'none', background: 'var(--re-color-primary)', color: '#fff', cursor: 'pointer' }}
-          >
-            Copy
-          </button>
-          {copied ? <span style={{ fontSize: 13, color: 'var(--re-color-muted)' }}>Copied ✓</span> : null}
-        </div>
-      </div>
-      <div style={{ background: '#0f1720', color: '#cfe8ff', padding: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace', fontSize: 13 }}>
-        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{children}</pre>
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -389,10 +436,11 @@ export default function ButtonExplorer() {
       <ReBox css={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24 }}>
         <div>
           <h4>Component Implementation</h4>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, minWidth: 320, maxWidth: 400 }}>
               <h5 style={{ marginBottom: 8 }}>Draggable Button</h5>
-              <Terminal>
+              <div style={{ height: 320 }}>
+                <Terminal>
 {`import { DraggableButton, ReButton } from '@re-ark/ui';
 
 function DraggableExample() {
@@ -412,11 +460,13 @@ function DraggableExample() {
   );
 }`}
               </Terminal>
+              </div>
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 320, maxWidth: 400 }}>
               <h5 style={{ marginBottom: 8 }}>Resizable Button</h5>
-              <Terminal>
+              <div style={{ height: 320 }}>
+                <Terminal>
 {`import { ResizableButton, ReButton } from '@re-ark/ui';
 
 function ResizableExample() {
@@ -432,6 +482,7 @@ function ResizableExample() {
   );
 }`}
               </Terminal>
+              </div>
             </div>
           </div>
         </div>
