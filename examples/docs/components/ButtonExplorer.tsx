@@ -385,6 +385,58 @@ export default function ButtonExplorer() {
         </div>
       </ReBox>
 
+      {/* Special Components Code Examples */}
+      <ReBox css={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24 }}>
+        <div>
+          <h4>Component Implementation</h4>
+          <div style={{ display: 'flex', gap: 24 }}>
+            <div style={{ flex: 1 }}>
+              <h5 style={{ marginBottom: 8 }}>Draggable Button</h5>
+              <Terminal>
+{`import { DraggableButton, ReButton } from '@re-ark/ui';
+
+function DraggableExample() {
+  return (
+    <div style={{ 
+      position: 'relative',
+      width: 300,
+      height: 200,
+      border: '1px dashed #ccc'
+    }}>
+      <DraggableButton initialX={20} initialY={20}>
+        <ReButton variant="solid" color="primary">
+          Drag me
+        </ReButton>
+      </DraggableButton>
+    </div>
+  );
+}`}
+              </Terminal>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h5 style={{ marginBottom: 8 }}>Resizable Button</h5>
+              <Terminal>
+{`import { ResizableButton, ReButton } from '@re-ark/ui';
+
+function ResizableExample() {
+  return (
+    <ResizableButton
+      minWidth={120}
+      maxWidth={400}
+    >
+      <ReButton variant="outline" color="primary">
+        Resize me
+      </ReButton>
+    </ResizableButton>
+  );
+}`}
+              </Terminal>
+            </div>
+          </div>
+        </div>
+      </ReBox>
+
       <hr />
     </div>
   );

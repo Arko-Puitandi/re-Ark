@@ -2,11 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-const defaultCode = `import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { ReBox } from '../../src/core/ReBox';
-import { ReButton } from '../../src/core/ReButton';
-
+const defaultCode = `// The components ReBox, ReButton are already imported for you
 function Demo() {
   return (
     <div style={{ padding: 12 }}>
@@ -19,6 +15,7 @@ function Demo() {
   );
 }
 
+// Create root and render
 const root = createRoot(document.getElementById('root'));
 root.render(<Demo />);`;
 
@@ -40,7 +37,8 @@ export default function PlaygroundPage() {
       </head>
       <body>
         <div id="root"></div>
-        <script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script type="module">
           (function() {
             const lib = window.parent && window.parent.__REARK__;
             if (!lib) {
@@ -50,9 +48,13 @@ export default function PlaygroundPage() {
             }
             const { React, createRoot, ReBox, ReButton } = lib;
             try {
-              const fn = new Function('React','createRoot','ReBox','ReButton', ${JSON.stringify(
-                codeStr
-              )});
+              // Transform JSX using Babel
+              const transformed = Babel.transform(${JSON.stringify(codeStr)}, {
+                presets: ['react'],
+                filename: 'playground.jsx'
+              }).code;
+              
+              const fn = new Function('React','createRoot','ReBox','ReButton', transformed);
               fn(React, createRoot, ReBox, ReButton);
             } catch (err) {
               const pre = document.createElement('pre');

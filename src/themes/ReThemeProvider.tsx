@@ -15,6 +15,7 @@ export const ReThemeProvider: React.FC<{ children?: React.ReactNode; theme?: ReT
     const root = document.documentElement;
     const t = reTokens;
 
+    // core tokens (base)
     root.style.setProperty('--re-color-bg', t.colors.background);
     root.style.setProperty('--re-color-foreground', t.colors.foreground);
     root.style.setProperty('--re-color-primary', t.colors.primary);
@@ -33,9 +34,18 @@ export const ReThemeProvider: React.FC<{ children?: React.ReactNode; theme?: ReT
     root.style.setProperty('--re-radii-md', `${t.radii.md}px`);
     root.style.setProperty('--re-font-body', t.fonts.body);
 
+    // resizer tokens
+    root.style.setProperty('--re-resize-bar', 'rgba(11,105,255,0.22)');
+    root.style.setProperty('--re-resize-bar-hover', 'rgba(11,105,255,0.44)');
+
+    // terminal tokens
+    root.style.setProperty('--re-terminal-bg', '#08101a');
+    root.style.setProperty('--re-terminal-foreground', '#cfe8ff');
+    root.style.setProperty('--re-border', 'rgba(0,0,0,0.06)');
+
     if (theme === 'dark') {
       root.dataset.reTheme = 'dark';
-      root.style.setProperty('--re-color-bg', '#071122');
+      root.style.setProperty('--re-color-bg', '#07121a');
       root.style.setProperty('--re-color-foreground', '#e6eef8');
       root.style.setProperty('--re-surface', '#0f1620');
       root.style.setProperty('--re-sidebar-bg', '#071226');
@@ -45,10 +55,18 @@ export const ReThemeProvider: React.FC<{ children?: React.ReactNode; theme?: ReT
       root.style.setProperty('--re-color-warning', '#fbbf24');
       root.style.setProperty('--re-color-danger', '#fb7185');
       root.style.setProperty('--re-color-neutral', '#9aa4b2');
+
+      // override resizer/terminal for dark
+      root.style.setProperty('--re-resize-bar', 'rgba(255,255,255,0.18)');
+      root.style.setProperty('--re-resize-bar-hover', 'rgba(255,255,255,0.28)');
+      root.style.setProperty('--re-terminal-bg', '#0b171f');
+      root.style.setProperty('--re-terminal-foreground', '#d8eefc');
+      root.style.setProperty('--re-border', 'rgba(255,255,255,0.06)');
     } else {
       delete root.dataset.reTheme;
     }
 
+    // inject small global style block for shared UI pieces (ripple, skeleton)
     const styleId = 'reark-global-theme';
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
     if (!styleEl) {
@@ -106,7 +124,7 @@ export const ReThemeProvider: React.FC<{ children?: React.ReactNode; theme?: ReT
         animation: reark-shimmer 1.1s linear infinite;
       }
       @keyframes reark-shimmer { 100% { transform: translateX(300%); } }
-      
+
       /* ensure ripple children positioned */
       .re-button { position: relative; overflow: hidden; }
     `;

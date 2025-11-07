@@ -1,12 +1,24 @@
 // examples/docs/App.tsx
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import NavBar from './components/NavBar';
 import { ReThemeProvider } from '../../src/themes/ReThemeProvider';
+import { ReBox } from '../../src/core/ReBox';
+import { ReButton } from '../../src/core/ReButton';
 import ComponentsPage from './pages/ComponentsPage';
+import ButtonsPage from './pages/ButtonsPage';
 import PlaygroundPage from './pages/Playground';
 
+// Expose components to window for playground
+(window as any).__REARK__ = {
+  ReBox,
+  ReButton,
+  React,
+  createRoot
+};
+
 export default function App() {
-  const [route, setRoute] = React.useState<'components' | 'playground' | 'about'>('components');
+  const [route, setRoute] = React.useState<'buttons' | 'components' | 'playground' | 'about'>('components');
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
 
   function toggleTheme() {
@@ -14,7 +26,7 @@ export default function App() {
   }
 
   function handleSetRoute(r: string) {
-    setRoute(r as 'components' | 'playground' | 'about');
+    setRoute(r as 'buttons' | 'components' | 'playground' | 'about');
   }
 
   return (
@@ -25,7 +37,8 @@ export default function App() {
 </aside>
 
         <main className="docs-main" role="main">
-          {route === 'components' && <ComponentsPage />}
+          {route === 'buttons' && <ButtonsPage />}
+          {route === 'components' && <ComponentsPage onNavigate={handleSetRoute} />}
           {route === 'playground' && <PlaygroundPage />}
           {route === 'about' && (
             <div>

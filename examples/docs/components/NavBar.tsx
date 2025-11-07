@@ -3,9 +3,15 @@ import React from 'react';
 import { cx } from '../../../src/core/cx';
 
 const NAV_ITEMS = [
-  { id: 'components', label: 'Components', route: 'components', description: 'Browse UI components', children: [
-    { id: 'components-buttons', label: 'Buttons', route: 'components/buttons' }
-  ] },
+  { 
+    id: 'components', 
+    label: 'Components', 
+    route: 'components', 
+    description: 'More components under development',
+    children: [
+      { id: 'buttons', label: 'Buttons', route: 'buttons', description: 'Button components and variants' }
+    ]
+  },
   { id: 'playground', label: 'Playground', route: 'playground', description: 'Live code sandbox' },
   { id: 'about', label: 'About', route: 'about', description: 'Project info' },
 ];
@@ -77,18 +83,27 @@ export default function NavBar({
         <nav className="docs-nav">
           {filtered.map((item) => {
             const active = route === item.route || route.startsWith(item.route + '/');
+            const isComponents = item.id === 'components';
+            
             return (
               <div key={item.id}>
-                <a
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); setRoute(item.route); }}
-                  className={cx('docs-nav-link', active && 'active')}
-                  title={item.description}
+                <div
+                  className={cx('docs-nav-link', active && 'active', isComponents && 'nav-header')}
+                  style={{ cursor: isComponents ? 'default' : 'pointer' }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!isComponents) {
+                      setRoute(item.route);
+                    } else if (item.children?.length) {
+                      // For components, navigate to the first child by default
+                      setRoute(item.children[0].route);
+                    }
+                  }}
                 >
                   <span className="nav-label">{item.label}</span>
                   <br/>
                   <small className="nav-desc">{item.description}</small>
-                </a>
+                </div>
 
                 {/* children links */}
                 {item.children?.length ? (
